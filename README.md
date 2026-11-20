@@ -22,10 +22,24 @@
 
 - Catalog: `02.factor-selection`
 - Workflow: `data-quality`
-- Validation: `listed`
+- Validation: `runnable`
 - License: `GPL-3.0-only`
 
-当前仓库定义方法、输入输出和研究边界，但尚未包含可运行实现。在补齐依赖、CLI、合成示例、预期输出和测试前，不得声明为 `runnable`。
+当前仓库包含经过 smoke 测试的 Python CLI、独立依赖、合成示例和 pytest 测试。
+
+## 可运行实现
+
+```bash
+python -m pip install -r requirements.txt
+python scripts/coverage_filter.py \
+  --manifest /path/to/manifest.json \
+  --output-dir /path/to/output \
+  --start-date 2023-01-01 \
+  --end-date 2023-12-31
+python -m pytest -q
+```
+
+核心结构化输出为 `ranked_factor_set.json`，其 Profile 为 `ranked-factor-set` 1.0.0；其余文件用于方法审计与复现。
 
 ## 入口
 

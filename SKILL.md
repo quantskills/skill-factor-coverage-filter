@@ -29,8 +29,8 @@ quantSkills:
   requires: []
   summary_zh: 在因子研究前检查数据覆盖率、有限值、日期覆盖和横截面完整性的因子筛选技能。
   summary_en: Factor coverage and data-integrity screening before downstream factor research.
-  status: draft
-  validation_level: listed
+  status: active
+  validation_level: runnable
   maintainer_type: community
   platforms:
   - cursor
@@ -39,14 +39,11 @@ quantSkills:
   - hermes
   - openclaw
   interface:
-    mode: structured
+    mode: hybrid
     envelope:
       name: quantskills-envelope
       version: 1.0.0
-    inputs:
-    - profile: factor-panel
-      version_range: '>=1.0.0 <2.0.0'
-      required: true
+    inputs: []
     outputs:
     - profile: ranked-factor-set
       version: 1.0.0
@@ -105,9 +102,19 @@ Read `references/protocol.md` before preparing inputs or interpreting outputs.
 - Limitations: disclose sample dependence, instability, approximation, missingness, and any untested operating regime.
 - Risk boundary: outputs are research evidence only and are not investment advice, promised returns, or production approval.
 
-## Current Project Status
+## Runnable Implementation
 
-This repository is a QuantSkills `listed` draft. It currently defines a portable method contract but does not yet contain a runnable implementation. Do not claim that it executed the method until scripts, dependencies, example input/output, and tests have been added and verified.
+Install dependencies with `python -m pip install -r requirements.txt` and run:
+
+```bash
+python scripts/coverage_filter.py \
+  --manifest /path/to/manifest.json \
+  --output-dir /path/to/output \
+  --start-date 2023-01-01 \
+  --end-date 2023-12-31
+```
+
+The CLI writes `ranked_factor_set.json` using the registered `ranked-factor-set` 1.0.0 profile together with method-specific audit artifacts. Generate synthetic smoke inputs from `examples/` and run `python -m pytest -q` before release.
 
 ## Optional qsh-form
 

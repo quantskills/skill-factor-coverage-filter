@@ -1,13 +1,13 @@
 # Scripts
 
-This project is currently a QuantSkills `listed` method contract. No runnable Factor Coverage Filter implementation is included yet.
+Install dependencies with `python -m pip install -r requirements.txt`. Run `coverage_filter.py` from the repository root:
 
-Before changing `validation_level` to `runnable`, add:
+```bash
+python scripts/coverage_filter.py \
+  --manifest /path/to/manifest.json \
+  --output-dir /path/to/output \
+  --start-date 2023-01-01 \
+  --end-date 2023-12-31
+```
 
-- a deterministic command-line entrypoint;
-- explicit dependency and Python-version declarations;
-- schema validation and fail-closed temporal-boundary checks;
-- a small public or synthetic example with expected outputs;
-- tests for determinism, leakage boundaries, failure handling, and output contracts.
-
-Do not add private datasets, credentials, generated signals, trained weights, caches, or temporary run logs.
+The command writes `selected_factors.json`, `ranked_factor_set.json`, `factor_audit.csv`, `excluded_factors.csv` and `audit_receipt.json`. Outputs belong outside the repository or under an ignored output directory.

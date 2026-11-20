@@ -1,4 +1,4 @@
-name: Validate skill contract
+name: Validate skill
 
 on: [push, pull_request]
 
@@ -19,14 +19,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install Registry validation dependencies
+      - name: Install dependencies
         run: |
-          if [ -f contract-registry/requirements-dev.txt ]; then
-            python -m pip install -r contract-registry/requirements-dev.txt
-          else
-            python -m pip install PyYAML
-          fi
+          python -m pip install -r contract-registry/requirements-dev.txt
+          python -m pip install -r skill-factor-coverage-filter/requirements.txt pytest
+      - name: Run tests
+        run: python -m pytest -q skill-factor-coverage-filter/tests
+      - name: Check CLI
+        run: python skill-factor-coverage-filter/scripts/coverage_filter.py --help
+      - name: Run synthetic smoke workflow
+        run: |
+          python skill-factor-coverage-filter/examples/generate_smoke_data.py --output-dir /tmp/coverage-smoke/data
+          python skill-factor-coverage-filter/scripts/coverage_filter.py --manifest /tmp/coverage-smoke/data/manifest.json --output-dir /tmp/coverage-smoke/out --start-date 2023-01-02 --end-date 2023-01-09 --min-date-coverage 1 --min-symbol-coverage 1 --min-finite-ratio 0.9 --min-cross-section 3
       - name: Validate catalog contract
         run: python contract-registry/scripts/validate_skill.py skill-factor-coverage-filter --contract-mode enforce
+      - name: Validate output contract
+        run: python contract-registry/scripts/validate_contract.py /tmp/coverage-smoke/out/ranked_factor_set.json
       - name: Validate optional qsh-form
         run: node skill-factor-coverage-filter/scripts/validate-qsh-form.mjs skill-factor-coverage-filter/SKILL.md
