@@ -1,48 +1,121 @@
 ---
-name: skill-template
-description: A canonical QuantSkills skill template for authoring portable, catalog-contract v2 skill projects across Cursor, Claude Code, Codex, Hermes, and OpenClaw. Use when creating or migrating a QuantSkills skill repository.
+name: skill-factor-coverage-filter
+description: Audit a factor panel and select factors that satisfy declared coverage, finite-value, and key-integrity
+  thresholds. Use when an agent needs a reproducible data-quality gate before factor selection or modeling. Do not
+  use labels, validation performance, or OOS outcomes to decide which factors pass.
 quantSkills:
   schema_version: 2.0.0
   organization: quantskills
   organization_url: https://github.com/quantskills
-  repository: skill-template
-  repository_url: https://github.com/quantskills/skill-template
+  repository: skill-factor-coverage-filter
+  repository_url: https://github.com/quantskills/skill-factor-coverage-filter
   project_type: skill
   license: GPL-3.0-only
-  maintainer: abgyjaguo
-  collection: infrastructure
-  catalog: {category: "10", subcategory: 10.skill-template}
-  workflow: {primary_stage: orchestration, workflow_stages: [orchestration]}
-  tags: [template, skill-authoring]
+  maintainer: X-Tech-group
+  collection: factor-research
+  catalog:
+    category: '02'
+    subcategory: 02.factor-selection
+  workflow:
+    primary_stage: data-quality
+    workflow_stages:
+    - data-quality
+    - factor-screening
+  tags:
+  - factor-selection
+  - data-quality
+  - coverage
+  - anti-leakage
   requires: []
-  summary_zh: 用于创建可移植 QuantSkills 技能项目的规范模板。
-  summary_en: Canonical template for portable QuantSkills skill projects.
-  status: active
-  validation_level: runnable
+  summary_zh: 在因子研究前检查数据覆盖率、有限值、日期覆盖和横截面完整性的因子筛选技能。
+  summary_en: Factor coverage and data-integrity screening before downstream factor research.
+  status: draft
+  validation_level: listed
   maintainer_type: community
-  platforms: [cursor, claude-code, codex, hermes, openclaw]
-  interface: {mode: not-applicable, reason: orchestration-only}
+  platforms:
+  - cursor
+  - claude-code
+  - codex
+  - hermes
+  - openclaw
+  interface:
+    mode: structured
+    envelope:
+      name: quantskills-envelope
+      version: 1.0.0
+    inputs:
+    - profile: factor-panel
+      version_range: '>=1.0.0 <2.0.0'
+      required: true
+    outputs:
+    - profile: ranked-factor-set
+      version: 1.0.0
+    adapters: []
 ---
+# Factor Coverage Filter
 
-# QuantSkills Skill Template
+Audit a factor panel and select factors that satisfy declared coverage, finite-value, and key-integrity thresholds.
 
-Use this repository as the canonical starting point for a portable QuantSkills skill.
+## Use This Skill When
 
-## Authoring boundary
+- Use it when an agent needs a reproducible data-quality gate before factor selection or modeling.
+- Do not use labels, validation performance, or OOS outcomes to decide which factors pass.
+- Treat all outputs as quantitative research artifacts, not investment advice or production approval.
 
-- Keep secrets and private datasets out of the repository.
-- Cite upstream sources and preserve required licenses when adapting material.
-- For quantitative projects, disclose data sources, assumptions, parameters, limitations, risk boundaries, and research-only status. Never promise returns or present output as investment advice.
-- The root declaration describes this `skill-template` repository. A copy-ready factor-evaluation declaration is in `references/declaration-example.yml`.
+## Inputs
+
+- A schema-compatible factor panel with stable factor identifiers.
+- Explicit audit range, universe rules, coverage thresholds, finite-value policy, and output directory.
+
+Read `references/protocol.md` before preparing inputs or interpreting outputs.
+
+## Method Decisions
+
+- Compute date, instrument, finite-value, and missing-value coverage on the declared research range.
+- Apply frozen thresholds and record one explicit outcome for every candidate factor.
+
+## Workflow
+
+1. Validate the factor panel, candidate manifest, primary keys, date ordering, and universe identifiers.
+2. Freeze the audit range, thresholds, denominator rules, and failure policy before computation.
+3. Compute date, instrument, finite-value, and missing-value coverage without labels or performance metrics.
+4. Assign every candidate an explicit selected, excluded, or failed outcome and reason.
+5. Re-audit the selected set and verify counts against the original manifest.
+6. Freeze the ranked factor set and audit receipts before downstream modeling or OOS access.
+
+## Output Contract
+
+- Emit a QuantSkills `quantskills-envelope` with profile `ranked-factor-set` version `1.0.0`.
+- Preserve the resolved thresholds, denominators, candidate outcomes, date boundaries, and input/output SHA256 receipts.
+- Never silently drop missing files, duplicate keys, invalid factor identifiers, or non-finite values.
+
+## Research Invariants
+
+- Compute coverage from declared panel keys and denominators, not from labels or performance metrics.
+- Freeze thresholds and missing-value policy before candidate outcomes are calculated.
+- Valid and OOS outcomes must not influence the data-quality gate.
+- Record one selected, excluded, or failed outcome for every candidate.
+- Record data provenance, assumptions, limitations, and all deviations from the declared protocol.
+
+## Research Disclosure
+
+- Data source: use only public data, user-provided local data, or material the user has the right to use; record provenance.
+- Assumptions: document time semantics, universe construction, factor direction, missing-value handling, and label availability.
+- Parameters: persist every threshold, seed, split boundary, preprocessing option, and method setting.
+- Limitations: disclose sample dependence, instability, approximation, missingness, and any untested operating regime.
+- Risk boundary: outputs are research evidence only and are not investment advice, promised returns, or production approval.
+
+## Current Project Status
+
+This repository is a QuantSkills `listed` draft. It currently defines a portable method contract but does not yet contain a runnable implementation. Do not claim that it executed the method until scripts, dependencies, example input/output, and tests have been added and verified.
 
 ## Optional qsh-form
 
-The `qsh-form` block below is an optional UI enhancement. It is independent of catalog data-interface compatibility; removing it keeps this template contract-valid.
-
 ```json qsh-form
-{"version":1,"task":{"placeholder":"Describe the research task","required":true},"fields":[],"prompt_template":"Handle this task: {{task}}. Attachments: {{#attachments}}"}
+{"version":1,"task":{"placeholder":"Describe the Factor Coverage Filter research task and attach the required local inputs","required":true},"fields":[],"prompt_template":"Handle this task: {{task}}. Attachments: {{#attachments}}"}
 ```
 
 ## References
 
-Use `references/source_boundary.md` for source boundaries.
+- `references/protocol.md`: input, temporal, output, and validation contract.
+- `references/source_boundary.md`: source, licensing, privacy, and research boundaries.
